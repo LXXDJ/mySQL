@@ -1,6 +1,5 @@
 -- Q1
 select
-	b.DEPT_TITLE,
 	sum(SALARY)
 from
 	employee a join department b on a.DEPT_CODE = b.DEPT_ID
@@ -55,7 +54,7 @@ where
 						DEPT_TITLE like '%영업%');
 
 -- Q4
-/*
+
 select
 	d.DEPT_ID,
     d.DEPT_TITLE,
@@ -65,7 +64,7 @@ from
 	department d 
 join location l on d.LOCATION_ID = l.LOCAL_CODE
 join nation n on l.NATIONAL_CODE = n.NATIONAL_CODE;
-*/
+
 /*
 select
 	e.EMP_ID,
@@ -89,16 +88,18 @@ select
     z.NATIONAL_NAME
 from
 	employee e
-left join (select
-				d.DEPT_ID,
-				d.DEPT_TITLE,
-				l.LOCAL_NAME,
-				n.NATIONAL_NAME
-			from
-				department d 
-			join location l on d.LOCATION_ID = l.LOCAL_CODE
-			join nation n on l.NATIONAL_CODE = n.NATIONAL_CODE) z
-on e.DEPT_CODE = z.DEPT_ID;
+join (select
+			d.DEPT_ID,
+			d.DEPT_TITLE,
+			l.LOCAL_NAME,
+			n.NATIONAL_NAME
+		from
+			department d 
+		join location l on d.LOCATION_ID = l.LOCAL_CODE
+		join nation n on l.NATIONAL_CODE = n.NATIONAL_CODE) z
+on e.DEPT_CODE = z.DEPT_ID
+order by
+	z.NATIONAL_NAME desc;
 
 /*
 with z as (select
@@ -128,17 +129,45 @@ with r as (select
 				e.SALARY,
 				z.DEPT_TITLE,
 				z.NATIONAL_NAME
+                ,z.DEPT_ID
 			from
 				employee e
-			left join (select
-							d.DEPT_ID,
-							d.DEPT_TITLE,
-							l.LOCAL_NAME,
-							n.NATIONAL_NAME
-						from
-							department d 
-						join location l on d.LOCATION_ID = l.LOCAL_CODE
-						join nation n on l.NATIONAL_CODE = n.NATIONAL_CODE) z
-			on e.DEPT_CODE = z.DEPT_ID)
+			join (select
+						d.DEPT_ID,
+						d.DEPT_TITLE,
+						l.LOCAL_NAME,
+						n.NATIONAL_NAME
+					from
+						department d 
+					join location l on d.LOCATION_ID = l.LOCAL_CODE
+					join nation n on l.NATIONAL_CODE = n.NATIONAL_CODE) z
+			on e.DEPT_CODE = z.DEPT_ID
+			order by
+				z.NATIONAL_NAME desc)
+
+select
+	e.EMP_ID,
+	e.EMP_NAME,
+	e.SALARY,
+	r.DEPT_TITLE,
+    r.NATIONAL_NAME
+from
+	employee e
+left join r on e.DEPT_CODE = r.DEPT_ID
+where 
+	r.NATIONAL_NAME = '러시아' and
+    sum(e.SALARY + (select
+								s.MIN_SAL
+							from
+								employee e
+							join
+								sal_grade s on e.SAL_LEVEL = s.SAL_LEVEL));
 
 
+select
+	e.EMP_NAME,
+	s.MIN_SAL
+from
+	employee e
+join
+	sal_grade s on e.SAL_LEVEL = s.SAL_LEVEL;
