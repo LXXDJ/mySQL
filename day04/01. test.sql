@@ -129,7 +129,6 @@ with r as (select
 				e.SALARY,
 				z.DEPT_TITLE,
 				z.NATIONAL_NAME
-                ,z.DEPT_ID
 			from
 				employee e
 			join (select
@@ -146,28 +145,22 @@ with r as (select
 				z.NATIONAL_NAME desc)
 
 select
-	e.EMP_ID,
-	e.EMP_NAME,
-	e.SALARY,
+	r.EMP_ID,
+	r.EMP_NAME,
+	r.SALARY,
 	r.DEPT_TITLE,
-    r.NATIONAL_NAME
+    r.NATIONAL_NAME,
+    ss.MIN_SAL,
+    r.SALARY + ss.MIN_SAL as '위로금'
 from
-	employee e
-left join r on e.DEPT_CODE = r.DEPT_ID
+	r
+left join (select
+				e.EMP_NAME,
+				e.SALARY,
+				s.MIN_SAL
+			from
+				employee e left join sal_grade s using (SAL_LEVEL)) as ss using (EMP_NAME)
 where 
-	r.NATIONAL_NAME = '러시아' and
-    sum(e.SALARY + (select
-								s.MIN_SAL
-							from
-								employee e
-							join
-								sal_grade s on e.SAL_LEVEL = s.SAL_LEVEL));
-
-
-select
-	e.EMP_NAME,
-	s.MIN_SAL
-from
-	employee e
-join
-	sal_grade s on e.SAL_LEVEL = s.SAL_LEVEL;
+	r.NATIONAL_NAME = '러시아'
+order by
+	r.SALARY + ss.MIN_SAL desc;
